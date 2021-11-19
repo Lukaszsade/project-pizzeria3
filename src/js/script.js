@@ -218,8 +218,7 @@
       console.log('AmountWidget: ', thisWidget);
       console.log('constructor argumets: ', element);
       thisWidget.getElements(element);
-
-      thisWidget.setValue(thisWidget.input.value);
+      thisWidget.setValue(settings.amountWidget.defaultValue);
       thisWidget.initActions();
     }
 
@@ -247,7 +246,6 @@
       }
 
       thisWidget.input.value = thisWidget.value;
-      console.log('thisWidget: ', thisWidget);
     }
     announce() {
       const thisWidget = this;
@@ -286,7 +284,6 @@
     initMenu: function () {
       const thisApp = this;
 
-      console.log('thisApp.data: ', thisApp.data);
       for (let productData in thisApp.data.products) {
         new Product(productData, thisApp.data.products[productData]);
       }
