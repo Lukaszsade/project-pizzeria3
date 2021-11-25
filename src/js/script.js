@@ -1,5 +1,7 @@
 /* global Handlebars, utils, dataSource */ // eslint-disable-line no-unused-vars
 
+
+
 {
   'use strict';
 
@@ -171,6 +173,15 @@
       });
     }
 
+    initAmountWidget() {
+      const thisProduct = this;
+
+      thisProduct.amountWidget = new AmountWidget(thisProduct.dom.amountWidgetElem);
+      thisProduct.dom.amountWidgetElem.addEventListener('update', function () {
+        thisProduct.processOrder();
+      });
+    }
+
     processOrder() {
       const thisProduct = this;
 
@@ -230,13 +241,21 @@
       // update calculated price in the HTML
       thisProduct.dom.priceElem.innerHTML = price;
     }
-    initAmountWidget() {
-      const thisProduct = this;
 
-      thisProduct.amountWidget = new AmountWidget(thisProduct.dom.amountWidgetElem);
-      thisProduct.dom.amountWidgetElem.addEventListener('update', function () {
-        thisProduct.processOrder();
-      });
+    prepareCartProduct() {
+      const thisProduct = this;
+      const productSummary = {
+
+        id: thisProduct.id,
+        name: thisProduct.data.name,
+        amount: thisProduct.amountWidget.value,
+        priceSingle: thisProduct.priceSingle,
+        price: thisProduct.amountWidget.value * thisProduct.priceSingle,
+        params: thisProduct.prepareCartProductParams(),
+      };
+
+      return productSummary;
+
     }
 
     addToCart() {
@@ -245,6 +264,40 @@
       app.cart.add(thisProduct.prepareCartProduct());
 
     }
+
+    prepareCartProductParams() {
+      const thisProduct = this;
+
+      const formData = utils.serializeFormToObject(thisProduct.form);
+      const params = {};
+
+      // for very category (param)
+      for (let paramId in thisProduct.data.params) {
+        const param = thisProduct.data.params[paramId];
+
+        // create category param in params const eg. params = { ingredients: { name: 'Ingredients', options: {}}}
+        params[paramId] = {
+          label: param.label,
+          options: {}
+        };
+
+        // for every option in this category
+        for (let optionId in param.options) {
+          const option = param.options[optionId];
+          const optionSelected = formData[paramId] && formData[paramId].includes(optionId);
+
+          if (optionSelected) {
+
+            // option is selected!
+            params[paramId].options[optionId] = option.label;
+          }
+        }
+      }
+
+      return params;
+    }
+
+
   }
 
   class AmountWidget {
@@ -308,24 +361,7 @@
 
     }
 
-    prepareCartProduct() {
-      const thisProduct = this;
-      const productSummary = {
 
-        id: thisProduct.id,
-        name: thisProduct.data.name,
-        amount: thisProduct.amountWidget.value,
-        priceSingle: thisProduct.priceSingle,
-        price: thisProduct.amountWidget.value * thisProduct.priceSingle,
-        params: {},
-      };
-
-      return productSummary;
-
-    }
-    prepareCartProductParams() {
-
-    }
   }
   class Cart {
     constructor(element) {
@@ -343,7 +379,7 @@
       thisCart.dom = {};
       thisCart.dom.wrapper = element;
       thisCart.dom.toggleTrigger = thisCart.dom.wrapper.querySelector(select.cart.toggleTrigger);
-
+      thisCart.dom.productList = element.querySelector(select.cart.productList);
     }
 
     initActions() {
@@ -354,10 +390,35 @@
     }
 
     add(menuProduct) {
-      // const thisCart = this;
+      const thisCart = this;
+
+      const generatedHTML = templates.cartProduct(menuProduct);
+      const generatedDOM = utils.createDOMFromHTML(generatedHTML);
+
+      thisCart.dom.productList.appendChild(generatedDOM);
+
+
+
 
       console.log('adding product', menuProduct);
+
+      // const thisProduct = this;
+
+      // //* generate HTML based od template
+      // const generatedHTML = templates.menuProduct(thisProduct.data);
+      // //console.log('generatedHTML: ', generatedHTML);
+
+      // //* create element using utils.createElementFromHTML
+      // thisProduct.element = utils.createDOMFromHTML(generatedHTML);
+
+      // //* find menu container 
+      // const menuContainer = document.querySelector(select.containerOf.menu);
+
+      // //* add element to menu 
+      // menuContainer.appendChild(thisProduct.element);
     }
+
+
 
   }
 
