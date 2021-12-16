@@ -264,11 +264,16 @@
 
   class AmountWidget {
     constructor(element) {
-      const thisWidget = this;
+      const thisWidget = this;    
+
 
       thisWidget.getElements(element);
-      thisWidget.setValue(settings.amountWidget.defaultValue);
+      thisWidget.value = settings.amountWidget.defaultValue;
+      thisWidget.setValue(thisWidget.input.value);
       thisWidget.initActions();
+
+      console.log('AmountWidget:', thisWidget);
+      console.log('constructor arguments:', element);
     }
 
     getElements(element) {
@@ -296,11 +301,11 @@
     announce() {
       const thisWidget = this;
 
-      const event = new Event('updated', {   ///tu jest blad 
+      const event = new Event('updated', {   
         bubbles: true
       });
       thisWidget.element.dispatchEvent(event);
-    }
+    } 
 
     initActions() {
       const thisWidget = this;
@@ -444,7 +449,7 @@
     initAmountWidget() {
       const thisCartProduct = this;
 
-      thisCartProduct.amountWidget = new AmountWidget(thisCartProduct.dom.amountWidget);
+      thisCartProduct.amountWidget = new AmountWidget(thisCartProduct.dom.amountWidget); 
       thisCartProduct.dom.amountWidget.addEventListener('updated', function () {
         thisCartProduct.amount = thisCartProduct.amountWidget.value;
         thisCartProduct.price = thisCartProduct.priceSingle * thisCartProduct.amount;
